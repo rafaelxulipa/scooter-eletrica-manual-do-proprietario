@@ -1,0 +1,5 @@
+node_modules
+dist
+.vercel
+# PDFs originais (sem marca d'agua): nao publicar
+source/
