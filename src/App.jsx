@@ -316,12 +316,15 @@ const Page = forwardRef(({ src, n }, ref) => (
 ))
 Page.displayName = 'Page'
 
+const unlockOrientation = () => { try { screen.orientation?.unlock?.() } catch { /* nao suportado */ } }
+
 function Flipbook() {
   const model = useModel()
   const wrap = useRef(null), book = useRef(null), box = useRef(null)
   const [dim, setDim] = useState({ w: 600, spread: true })
   const [cur, setCur] = useState(0)
   const [full, setFull] = useState(false)
+  const [reader, setReader] = useState(false) // modo leitura ampliada (celular)
   const total = model.pages.length
   // o livro remonta ao trocar modelo ou layout; volta para a capa e zera o contador
   useEffect(() => { setCur(0) }, [model.id, dim.w, dim.spread])
@@ -330,21 +333,28 @@ function Flipbook() {
     // Uma pagina por vez. A largura tambem e limitada pela altura da janela, para a pagina inteira caber na tela.
     const fit = (cw) => {
       const spread = false // uma pagina por vez (efeito de virar original)
-      const byH = Math.floor((window.innerHeight - (document.fullscreenElement ? 150 : 230)) * 841.92 / 594.96)
+      const byH = Math.floor((window.innerHeight - (full ? 90 : 230)) * 841.92 / 594.96)
       const w = Math.min(Math.floor(cw), byH, 1100)
       setDim({ w: Math.max(280, w), spread })
     }
+    if (!wrap.current) return
     const ro = new ResizeObserver(([e]) => fit(e.contentRect.width))
     ro.observe(wrap.current)
-    const onResize = () => fit(wrap.current.clientWidth)
+    const onResize = () => wrap.current && fit(wrap.current.clientWidth)
     window.addEventListener('resize', onResize)
     return () => { ro.disconnect(); window.removeEventListener('resize', onResize) }
-  }, [full])
+  }, [full, reader])
   useEffect(() => {
-    const h = () => setFull(!!document.fullscreenElement)
+    // saiu da tela cheia nativa (ex.: tecla Esc)
+    const h = () => { if (!document.fullscreenElement) { setFull(false); setReader(false); unlockOrientation() } }
     document.addEventListener('fullscreenchange', h)
     return () => document.removeEventListener('fullscreenchange', h)
   }, [])
+  useEffect(() => {
+    // trava a rolagem do site enquanto o manual esta em tela cheia
+    document.body.style.overflow = full ? 'hidden' : ''
+    return () => { document.body.style.overflow = '' }
+  }, [full])
   useEffect(() => {
     const k = (e) => {
       const r = box.current?.getBoundingClientRect()
@@ -359,13 +369,38 @@ function Flipbook() {
   const { w, spread } = dim
   const h = Math.round(w * 594.96 / 841.92)
   const go = (i) => book.current?.pageFlip().flip(i)
-  const toggleFull = () => (document.fullscreenElement ? document.exitFullscreen() : box.current?.requestFullscreen())
+  const toggleFull = () => {
+    if (full) {
+      if (document.fullscreenElement) document.exitFullscreen().catch(() => {})
+      unlockOrientation()
+      setFull(false); setReader(false)
+      return
+    }
+    setFull(true)
+    // Celular (tela estreita): modo leitura ampliada. Desktop/tablet: overlay + tela cheia nativa quando existir.
+    if (window.innerWidth < 700) { setReader(true); return }
+    box.current?.requestFullscreen?.().catch(() => {})
+    try { screen.orientation?.lock?.('landscape').catch(() => {}) } catch { /* nao suportado */ }
+  }
 
   return (
     <section id="manual" className="section dark">
       <Reveal><p className="kicker">Manual interativo</p><h2>Folheie o <em>manual</em></h2>
         <p className="sub">Arraste as bordas da página, clique nas setas ou use as teclas ← →.</p></Reveal>
       <div className={'book-box' + (full ? ' full' : '')} ref={box}>
+        {reader ? (
+          <div className="reader">
+            <div className="reader-bar">
+              <span>Arraste e use zoom com os dedos</span>
+              <a href={model.pdf} download aria-label="Baixar PDF"><Download size={18} /></a>
+              <button onClick={toggleFull} aria-label="Fechar leitura"><Minimize2 size={18} /> Fechar</button>
+            </div>
+            <div className="reader-scroll">
+              {model.pages.map((src, i) => <img key={src} src={src} alt={`Página ${i + 1} do manual`} />)}
+            </div>
+          </div>
+        ) : (
+          <>
         <div className="book-stage" ref={wrap}>
           <HTMLFlipBook key={model.id + w + spread} ref={book} width={w} height={h} size="fixed" usePortrait showCover={false}
             drawShadow maxShadowOpacity={0.5} flippingTime={800} mobileScrollSupport={false} onFlip={(e) => setCur(e.data)} className="flip" style={{}}>
@@ -377,8 +412,11 @@ function Flipbook() {
           <div className="dots">{model.pages.map((_, i) => <button key={i} className={cur === i ? 'on' : ''} onClick={() => go(i)} aria-label={`Ir para página ${i + 1}`} />)}</div>
           <span className="count">{cur + 1} / {total}</span>
           <button onClick={() => book.current?.pageFlip().flipNext()} aria-label="Próxima página" disabled={cur === total - 1}><ChevronRight /></button>
-          <button onClick={toggleFull} aria-label="Tela cheia">{full ? <Minimize2 size={18} /> : <Maximize2 size={18} />}</button>
+          <button onClick={toggleFull} aria-label={full ? 'Sair da tela cheia' : 'Tela cheia'}>{full ? <Minimize2 size={18} /> : <Maximize2 size={18} />}</button>
         </div>
+          </>
+        )}
+        {!full && <button className="fs-cta" onClick={toggleFull}><Maximize2 size={16} /> Ampliar para ler</button>}
       </div>
     </section>
   )

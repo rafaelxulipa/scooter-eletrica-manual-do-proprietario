@@ -11,7 +11,7 @@ Landing page moderna e interativa para o manual da moto elétrica **Cappuccino**
 | Especificações | Cards com números que contam até o valor, efeito 3D ao passar o mouse, painel LED com legenda interativa |
 | Partes da moto | Ilustração com 9 pontos clicáveis ligados a uma lista |
 | Segurança | Acordeão com as regras do manual e um checklist "Verifique antes de pilotar" com anel de progresso |
-| Manual interativo | Flipbook com efeito de virar página, setas, teclado (← →), indicadores e tela cheia |
+| Manual interativo | Flipbook com efeito de virar página, setas, teclado (← →), indicadores e tela cheia. No celular, o botão "Ampliar para ler" abre um modo leitura com as páginas grandes, que se arrastam e aceitam zoom com os dedos |
 | Download | PDF de cada modelo, com marca d'água |
 
 Extras: barra de progresso de rolagem, brilho que acompanha o cursor, menu com desfoque, favicons, layout responsivo (celular, tablet, desktop) e respeito a `prefers-reduced-motion`.

@@ -107,6 +107,7 @@ h2 em { font-style: normal; color: var(--strong); }
 .diagram-box { position: relative; background: #fff; border-radius: var(--r); padding: 20px; aspect-ratio: 1 / 1; max-height: 640px; margin: 0 auto; }
 .diagram-box img { width: 100%; height: 100%; object-fit: contain; }
 .hot { position: absolute; translate: -50% -50%; width: 30px; height: 30px; border-radius: 50%; background: var(--accent); color: var(--ink); font-size: 12px; font-weight: 700; display: grid; place-items: center; border: 2px solid #fff; box-shadow: 0 4px 14px rgba(0,0,0,.25); transition: transform .2s, background .3s; }
+.hot::after { content: ''; position: absolute; inset: -9px; border-radius: 50%; } /* area de toque ~48px */
 .hot.on { background: var(--strong); color: #fff; transform: scale(1.25); z-index: 2; }
 .ping { position: absolute; inset: -2px; border-radius: 50%; border: 2px solid var(--strong); animation: ping 1.4s ease-out infinite; }
 @keyframes ping { to { transform: scale(2.2); opacity: 0; } }
@@ -114,7 +115,7 @@ h2 em { font-style: normal; color: var(--strong); }
 .parts-list { display: grid; gap: 8px; }
 .parts-list button { display: flex; align-items: center; gap: 14px; padding: 12px 16px; border-radius: 14px; background: rgba(255,255,255,.05); text-align: left; transition: background .2s, transform .2s; }
 .parts-list button:hover { background: rgba(255,255,255,.1); }
-.parts-list button.on { background: var(--accent); color: var(--ink); transform: translateX(8px); }
+.parts-list button.on { background: var(--accent); color: var(--ink); box-shadow: 0 8px 22px -10px var(--strong); }
 .parts-list button.on b { background: var(--ink); color: #fff; }
 
 /* seguranca */
@@ -149,7 +150,15 @@ h2 em { font-style: normal; color: var(--strong); }
 
 /* flipbook */
 .book-box { margin-top: 44px; max-width: 1180px; }
-.book-box.full { background: var(--ink); display: flex; flex-direction: column; justify-content: center; padding: 20px; max-width: none; margin: 0; }
+.book-box.full { height: 100dvh; position: fixed; inset: 0; z-index: 300; background: var(--ink); display: flex; flex-direction: column; justify-content: center; padding: 12px; max-width: none; margin: 0; overflow: auto; }
+.book-box.full .book-ctrl { margin-top: 12px; }
+.reader { display: flex; flex-direction: column; height: 100%; min-height: 0; }
+.reader-bar { display: flex; align-items: center; gap: 10px; padding: 4px 4px 12px; font-size: 13px; color: #a9a9b6; }
+.reader-bar span { flex: 1; }
+.reader-bar a, .reader-bar button { display: inline-flex; align-items: center; gap: 6px; padding: 10px 14px; border-radius: 999px; background: var(--accent); color: var(--ink); font-weight: 600; font-size: 14px; }
+.reader-scroll { flex: 1; overflow: auto; -webkit-overflow-scrolling: touch; border-radius: 12px; background: #15151b; padding: 8px; }
+.reader-scroll img { width: 210vw; max-width: none; margin-bottom: 10px; border-radius: 6px; }
+.fs-cta { display: none; margin: 18px auto 0; align-items: center; gap: 8px; padding: 12px 20px; border-radius: 999px; background: var(--accent); color: var(--ink); font-weight: 600; font-size: 14px; }
 .book-stage { width: 100%; max-width: 1180px; margin: 0 auto; display: flex; justify-content: center; min-height: 200px; }
 .flip { margin: 0 auto; filter: drop-shadow(0 30px 40px rgba(0,0,0,.5)); }
 .page { background: #fff; overflow: hidden; }
@@ -191,10 +200,15 @@ h2 em { font-style: normal; color: var(--strong); }
 }
 @media (max-width: 560px) {
   .nav { padding: 10px 12px; }
-  .brand { font-size: 0; gap: 0; }
+  .nav .brand { font-size: 0; gap: 0; }
   .switch button { padding: 6px 10px; font-size: 12px; }
   .btn.small span { display: none; }
-  .stats { grid-template-columns: 1fr; }
+  .stats { grid-template-columns: 1fr 1fr; gap: 12px; }
+  .stat { padding: 18px 16px 18px 20px; }
+  .stat-icon { margin-bottom: 10px; }
+  .num { font-size: 24px; }
+  .lbl { font-size: 13px; }
+  .fs-cta { display: flex; width: fit-content; }
   .check-body { grid-template-columns: 1fr; justify-items: center; }
   .acc-item ul { padding-left: 22px; }
   .dl { grid-template-columns: 100px 1fr; }
