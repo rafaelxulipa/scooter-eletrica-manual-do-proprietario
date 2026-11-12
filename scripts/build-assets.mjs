@@ -94,5 +94,28 @@ writeFileSync('public/site.webmanifest', JSON.stringify({
   theme_color: '#1f1f27', background_color: '#1f1f27', display: 'standalone',
 }, null, 2))
 
+// Imagem de pre-visualizacao para WhatsApp, redes sociais e buscadores (1200x630)
+{
+  const W = 1200, H = 630
+  const photo = await sharp(join(imgDir, 'scooter-verde.webp')).resize({ height: H - 30 }).png().toBuffer()
+  // cor de fundo do painel = cor do canto da foto, para nao aparecer retangulo
+  const { data: px } = await sharp(photo).raw().toBuffer({ resolveWithObject: true })
+  const panelBg = `rgb(${px[0]},${px[1]},${px[2]})`
+  const text = Buffer.from(`<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}">
+    <text x="70" y="190" fill="#a8d8c5" font-family="Poppins, Helvetica, Arial, sans-serif" font-size="20" font-weight="700" letter-spacing="5">MANUAL DO PROPRIETÁRIO</text>
+    <text x="64" y="320" fill="#ffffff" font-family="Poppins, Helvetica, Arial, sans-serif" font-size="124" font-weight="800">MOTO</text>
+    <text x="64" y="436" fill="#a8d8c5" font-family="Poppins, Helvetica, Arial, sans-serif" font-size="124" font-weight="800">ELÉTRICA</text>
+    <rect x="70" y="470" width="110" height="6" rx="3" fill="#a8d8c5"/>
+    <text x="70" y="540" fill="#c9c9d3" font-family="Poppins, Helvetica, Arial, sans-serif" font-size="30" font-weight="500">Cappuccino  |  1000 W  |  32 km/h</text>
+  </svg>`)
+  await sharp({ create: { width: W, height: H, channels: 3, background: '#1f1f27' } })
+    .composite([
+      { input: Buffer.from(`<svg xmlns="http://www.w3.org/2000/svg" width="520" height="${H}"><rect width="520" height="${H}" fill="${panelBg}"/></svg>`), left: W - 520, top: 0 },
+      { input: photo, left: W - 520 + Math.round((520 - (await sharp(photo).metadata()).width) / 2), top: 15 },
+      { input: text, left: 0, top: 0 },
+    ])
+    .jpeg({ quality: 82 }).toFile('public/og-image.jpg')
+}
+
 rmSync(tmp, { recursive: true, force: true })
 console.log('Assets gerados.')

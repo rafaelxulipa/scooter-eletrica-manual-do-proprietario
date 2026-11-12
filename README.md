@@ -62,6 +62,14 @@ WATERMARK="DEMONSTRAÇÃO" WATERMARK_SUB="Proposta para NOME DO CLIENTE" npm run
 
 Importante: os PDFs originais ficam só em `source/`, que está no `.gitignore`. Nunca coloque os originais em `public/`, senão qualquer pessoa consegue baixar sem a marca. Se o repositório for público, confirme que `source/` continua ignorado. Os `public/*` gerados são commitados, então a Vercel não precisa do poppler.
 
+## Pré-visualização de link (WhatsApp, redes sociais)
+
+Ao colar o link no WhatsApp, Instagram, LinkedIn etc., aparece uma imagem, título e descrição. Isso vem das meta tags Open Graph do `index.html` e da imagem `public/og-image.jpg` (1200x630), gerada por `npm run assets`.
+
+- **URL absoluta:** o WhatsApp exige endereço completo na imagem. O build preenche sozinho com o domínio da Vercel (`VERCEL_PROJECT_PRODUCTION_URL`). Para usar domínio próprio, crie na Vercel a variável de ambiente `SITE_URL` (ex.: `https://meusite.com.br`) e faça novo deploy.
+- **Trocar título/descrição:** edite as tags `og:title`, `og:description` e `twitter:*` em `index.html`.
+- **Cache do WhatsApp:** ele guarda a prévia de links já enviados. Se mudar a imagem, teste com um link novo (ex.: `?v=2` no final) ou use o depurador do Facebook para limpar o cache.
+
 ## Como editar o conteúdo
 
 - **Textos, números, partes e checklist:** `src/data.js`
